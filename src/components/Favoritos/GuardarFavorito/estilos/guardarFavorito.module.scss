@@ -1,0 +1,126 @@
+/* guardarFavorito.module.scss */
+.saveButton {
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  padding: 6px;
+}
+.favoriteIcon {
+  font-size: 22px;
+  color: var(--primary-color, #e63946);
+}
+
+.modalOverlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.45);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+}
+
+.modal {
+  width: 96%;
+  max-width: 520px;
+  background: white;
+  border-radius: 10px;
+  box-shadow: 0 8px 30px rgba(0,0,0,0.2);
+  padding: 16px;
+}
+
+.modalHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.modalTitle {
+  margin: 0;
+  font-size: 18px;
+}
+
+.modalClose {
+  background: transparent;
+  border: none;
+  font-size: 18px;
+  cursor: pointer;
+}
+
+.modalBody {
+  margin-top: 12px;
+}
+
+.inputLabel {
+  display: block;
+  margin-bottom: 6px;
+  font-size: 13px;
+}
+
+.input {
+  width: 100%;
+  padding: 8px 10px;
+  border-radius: 6px;
+  border: 1px solid #ddd;
+  margin-bottom: 12px;
+  font-size: 14px;
+}
+
+.preview {
+  margin-top: 8px;
+  background: #fafafa;
+  padding: 10px;
+  border-radius: 6px;
+  font-size: 13px;
+}
+
+.previewTitle {
+  font-weight: 600;
+  margin-bottom: 6px;
+}
+
+.previewRow {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 6px;
+}
+
+.previewLabel {
+  min-width: 110px;
+  color: #555;
+  font-weight: 600;
+}
+
+.previewValue {
+  flex: 1;
+  color: #222;
+}
+
+.error {
+  color: #b00020;
+  margin-top: 8px;
+}
+
+.modalFooter {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+  margin-top: 12px;
+}
+
+.cancelButton {
+  background: transparent;
+  border: 1px solid #ccc;
+  padding: 8px 12px;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+.confirmButton {
+  background: var(--primary-color, #1f6feb);
+  color: white;
+  border: none;
+  padding: 8px 14px;
+  border-radius: 6px;
+  cursor: pointer;
+}

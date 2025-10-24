@@ -1,0 +1,89 @@
+@use "../../../styles/globals.scss" as *;
+
+.banner {
+  position: sticky;
+  top: 60px;
+  z-index: 999;
+  background-color: $color-fondo;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  padding: 12px 16px;
+}
+
+.content {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.titleRow {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+}
+
+.title {
+  font-family: $font-title;
+  font-size: 1rem;
+}
+
+.groupsContainer {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+}
+
+.group {
+  min-width: 140px;
+}
+
+.groupTitle {
+  font-family: $font-title;
+  font-size: 14px;
+  color: $color-primario;
+  margin-bottom: 4px;
+}
+
+.groupItems {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+}
+
+.ingredientBadge {
+  background-color: $color-fondo-oscuro;
+  padding: 4px 8px;
+  border-radius: $radius-base;
+  font-family: $font-body;
+  font-size: 12px;
+  color: $color-texto;
+}
+
+.empty {
+  font-size: 12px;
+  color: #999;
+}
+
+.total {
+  display: flex;
+  align-items: center;
+  font-family: $font-title;
+  font-size: 18px;
+  color: $color-acento;
+}
+
+.icon {
+  margin-right: 4px;
+}
+
+/* Responsive */
+@media (max-width: 600px) {
+  .content {
+    flex-direction: column;
+  }
+  .total {
+    margin-top: 8px;
+  }
+}

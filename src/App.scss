@@ -1,0 +1,33 @@
+@use './styles/globals.scss' as *;
+
+.App {
+  text-align: center;
+  font-family: $font-body;
+}
+
+.body {
+  margin-top: 60px;
+}
+
+.loading {
+  padding: 3rem;
+  font-size: 1.5rem;
+  text-align: center;
+  color: #888;
+}
+
+.containerMain {
+  padding: 1rem;
+}
+
+@media(max-width: 350px){
+  .containerMain {
+    font-size: .7rem;
+  }
+}
+
+@media(min-width: 350px) and (max-width: 400px){
+  .containerMain {
+    font-size: .9rem;
+  }
+}

@@ -1,0 +1,75 @@
+@use "../../../styles/globals.scss" as *;
+
+.card {
+  @include card();
+  margin-bottom: 12px;
+}
+
+.groupTitle {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+
+.groupName {
+  font-family: $font-title;
+  font-size: 15px;
+  margin: 0;
+}
+
+.groupNote {
+  color: $color-texto;
+  font-size: 13px;
+  opacity: 0.7;
+}
+
+.items {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+  gap: 8px;
+}
+
+.saucesItems {
+  grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
+}
+
+.item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px;
+  border-radius: $radius-base;
+  cursor: pointer;
+  user-select: none;
+  transition: background 0.12s ease, transform 0.06s ease;
+}
+
+.item input {
+  width: 18px;
+  height: 18px;
+  margin: 0;
+}
+
+.item:hover {
+  transform: translateY(-1px);
+}
+
+.labelWrap {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex: 1;
+}
+
+.ingredientName {
+  font-family: $font-body;
+  font-size: 14px;
+}
+
+.checkboxIcon {
+  color: $color-texto;
+  display: inline-flex;
+  align-items: center;
+}

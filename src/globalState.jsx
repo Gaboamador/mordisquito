@@ -34,6 +34,9 @@ function GlobalState(props){
   // Estado para controlar si los ingredientes actuales corresponden a un favorito elegido
   const [favoritoElegido, setFavoritoElegido] = useState(false);
 
+  // Estado para almacenar el favorito actual completo
+  const [favoritoActual, setFavoritoActual] = useState(null);
+
   // Lista global de favoritos
   const [favoritos, setFavoritos] = useState([]);
 
@@ -137,27 +140,35 @@ function GlobalState(props){
   }, [selected, selectedProduct]);
 
   // Verificar si la selección coincide con algún favorito
-const verificarFavoritoActual = () => {
-  if (!user || !selectedProduct) return setFavoritoElegido(false);
+    const verificarFavoritoActual = () => {
+      if (!user || !selectedProduct) {
+        setFavoritoElegido(false);
+        setFavoritoActual(null);
+        return;
+      }
 
-  const match = favoritos.some((fav) => {
-    if (fav.productId !== selectedProduct) return false;
+      const match = favoritos.find((fav) => {
+        if (fav.productId !== selectedProduct) return false;
 
-    const favIngredientes = fav.ingredientes || {};
-    const selIngredientes = selected || {};
+        const favIngredientes = fav.ingredientes || {};
+        const selIngredientes = selected || {};
 
-    return Object.keys(favIngredientes).every((key) => {
-      const favItems = favIngredientes[key] || [];
-      const selItems = selIngredientes[key] || [];
-      if (favItems.length !== selItems.length) return false;
-      return favItems.every((item) => selItems.includes(item));
-    });
-  });
+        return Object.keys(favIngredientes).every((key) => {
+          const favItems = favIngredientes[key] || [];
+          const selItems = selIngredientes[key] || [];
+          if (favItems.length !== selItems.length) return false;
+          return favItems.every((item) => selItems.includes(item));
+        });
+      });
 
-  setFavoritoElegido(match);
-};
-
-
+      if (match) {
+        setFavoritoElegido(true);
+        setFavoritoActual(match); // guarda el objeto completo del favorito
+      } else {
+        setFavoritoElegido(false);
+        setFavoritoActual(null);
+      }
+    };
 
   useEffect(() => {
     verificarFavoritoActual();
@@ -175,7 +186,7 @@ const verificarFavoritoActual = () => {
       console.error("Error cerrando sesión:", error);
     }
   };
-
+console.log(favoritoElegido, "fav global")
 
     return(
         <Context.Provider value={{
@@ -193,8 +204,10 @@ const verificarFavoritoActual = () => {
             setSelectedProduct,
             favoritoElegido,
             setFavoritoElegido,
+            favoritoActual,
             favoritos,
             setFavoritos,
+            productsDataMap,
         }}>
             {props.children}
         </Context.Provider>

@@ -4,10 +4,12 @@ import ModalBase from "../../ModalBase";
 import Context from "../../../context";
 import { eliminarFavorito } from "../../../utils/firebaseFavoritos";
 import calculateTotal from "../../../utils/calculateTotals";
+import { ordenGlobal, nombresLegibles } from "../../../utils/nombresYOrden";
+import { MdDownload, MdDelete } from "react-icons/md";
 
 const AdministrarFavoritos = ({ open, onClose }) => {
   const context = useContext(Context);
-  const { user, setSelected, setSelectedProduct, productData, favoritos, setFavoritos } = context;
+  const { user, setSelected, setSelectedProduct, productData, favoritos, setFavoritos, productsDataMap } = context;
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
@@ -49,53 +51,81 @@ const handleLoadFavorito = (fav) => {
   onClose();
 };
 
-  return (
-    <ModalBase open={open} onClose={onClose} title="Mis Favoritos">
-      {loading && <div className={styles.loader}>Cargando...</div>}
-      {error && <div className={styles.error}>{error}</div>}
-      {!loading && favoritos.length === 0 && (
-        <div className={styles.empty}>No tenés favoritos guardados aún.</div>
-      )}
+return (
+  <ModalBase open={open} onClose={onClose} title="Mis Favoritos">
+    {loading && <div className={styles.loader}>Cargando...</div>}
+    {error && <div className={styles.error}>{error}</div>}
+    {!loading && favoritos.length === 0 && (
+      <div className={styles.empty}>No tenés favoritos guardados aún.</div>
+    )}
 
-      <div className={styles.list}>
-        {favoritos.map((fav) => {
-          const precio = calculateTotal(productData, fav.ingredientes);
-          return (
-            <div key={fav.id} className={styles.item}>
-              <div className={styles.info}>
-                <div className={styles.name}>
-                {fav.id}
-                <span className={styles.productId}>({fav.productId})</span>
-                </div>
-                <div className={styles.ingredients}>
-                  {Object.entries(fav.ingredientes)
-                    .flatMap(([g, items]) =>
-                      Array.isArray(items) ? items.map((it) => `${g}: ${it}`) : []
-                    )
-                    .join(" · ")}
-                </div>
-                <div className={styles.price}>${precio.toLocaleString()}</div>
+    <div className={styles.list}>
+      {favoritos.map((fav) => {
+        const productDataForFav = productsDataMap?.[fav.productId];
+        const precio = productDataForFav
+          ? calculateTotal(productDataForFav, fav.ingredientes)
+          : 0;
+
+        return (
+          <div key={fav.id} className={styles.item}>
+            {/* ─ Primera línea: producto, nombre, precio, acciones ─ */}
+            <div className={styles.topRow}>
+              <div className={styles.nameCol}>
+                <span className={styles.name}>{fav.id}</span>
+                <span className={styles.productId}>
+                  ({nombresLegibles[fav.productId] || fav.productId})
+                </span>
               </div>
-              <div className={styles.actions}>
+
+              <div className={styles.priceCol}>
+                ${precio.toLocaleString()}
+              </div>
+
+              <div className={styles.actionsCol}>
                 <button
-                  className={styles.loadBtn}
+                  title="Cargar favorito"
+                  className={styles.iconBtn}
                   onClick={() => handleLoadFavorito(fav)}
                 >
-                  Cargar
+                  <MdDownload />
                 </button>
                 <button
-                  className={styles.deleteBtn}
+                  title="Eliminar favorito"
+                  className={styles.iconBtn}
                   onClick={() => handleDelete(fav.id)}
                 >
-                  Eliminar
+                  <MdDelete />
                 </button>
               </div>
             </div>
-          );
-        })}
-      </div>
-    </ModalBase>
-  );
+
+            {/* ─ Segunda línea: ingredientes ─ */}
+            <div className={styles.ingredientsCol}>
+              {Object.entries(fav.ingredientes || {})
+                .filter(([, items]) => Array.isArray(items) && items.length > 0)
+                .sort(([ka], [kb]) => {
+                  const ia = ordenGlobal.indexOf(ka);
+                  const ib = ordenGlobal.indexOf(kb);
+                  if (ia === -1 && ib === -1) return ka.localeCompare(kb);
+                  if (ia === -1) return 1;
+                  if (ib === -1) return -1;
+                  return ia - ib;
+                })
+                .map(([grupo, items]) => {
+                  const nombreGrupo = nombresLegibles[grupo] || grupo;
+                  return (
+                    <div key={grupo} className={styles.groupLine}>
+                      <strong>{nombreGrupo}:</strong> {items.join(", ")}
+                    </div>
+                  );
+                })}
+            </div>
+          </div>
+        );
+      })}
+    </div>
+  </ModalBase>
+);
 };
 
 export default AdministrarFavoritos;

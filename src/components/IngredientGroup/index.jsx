@@ -7,7 +7,6 @@ const IngredientGroup = ({
   items = [],
   selected = [],
   onToggle,
-  isSalsa = false,
   saucesLocked = false,
 }) => {
   const selectedSet = new Set(selected);
@@ -19,14 +18,14 @@ const IngredientGroup = ({
         {description && <div className={styles.groupNote}>{description}</div>}
       </div>
 
-      <div className={`${styles.items} ${isSalsa ? styles.saucesItems : ""}`}>
+      <div className={`${styles.items}`}>
         {items.length === 0 ? (
           <div className={styles.empty}>Sin opciones</div>
         ) : (
           items.map((item) => {
             const id = `${title}__${item}`;
             const checked = selectedSet.has(item);
-            const disabled = isSalsa && saucesLocked && !checked;
+            const disabled = saucesLocked && !checked;
 
             return (
               <label key={id} className={styles.item} htmlFor={id}>

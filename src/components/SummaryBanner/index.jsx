@@ -1,9 +1,12 @@
-import React from "react";
+import React, { useContext } from "react";
+import Context from "../../context";
 import styles from "./estilos/summaryBanner.module.scss";
 import { FaDollarSign } from "react-icons/fa";
 import GuardarFavorito from "../Favoritos/GuardarFavorito";
 
 const SummaryBanner = ({ selected = {}, groups = {}, total = 0, order, namesMap, selectedProduct, productData }) => {
+
+  const context = useContext(Context);
 
   return (
       <div className={styles.banner}>
@@ -12,6 +15,14 @@ const SummaryBanner = ({ selected = {}, groups = {}, total = 0, order, namesMap,
         <div className={styles.title}>Resumen del producto</div>
         <GuardarFavorito selected={selected} productId={selectedProduct} productData={productData} />
       </div>
+
+      {context.favoritoActual && (
+          <div className={styles.loadedFavorite}>
+            {/* <span>Favorito cargado:</span>{" "} */}
+            <strong>{context.favoritoActual.id}</strong>
+          </div>
+        )}
+
       <div className={styles.groupsContainer}>
         {order.map((key) => {
           const items = selected[key] || [];

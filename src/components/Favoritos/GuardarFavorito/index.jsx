@@ -5,6 +5,7 @@ import styles from "./estilos/guardarFavorito.module.scss";
 import Context from "../../../context";
 import { guardarFavorito } from "../../../utils/firebaseFavoritos";
 import calculateTotal from "../../../utils/calculateTotals";
+import { nombresLegibles, ordenGlobal, productoLegible } from "../../../utils/nombresYOrden";
 
 /**
  * Props esperadas:
@@ -112,7 +113,7 @@ const GuardarFavorito = ({ selected = {}, productId = null, productData = {}, on
                 className={styles.input}
                 value={name}
                 onChange={(e) => setName(e.target.value)}
-                placeholder="Ej: Mi Wrap Especial"
+                placeholder={`Ej: Mi ${productoLegible[productId] || productId} especial`}
                 maxLength={60}
               />
 
@@ -120,21 +121,38 @@ const GuardarFavorito = ({ selected = {}, productId = null, productData = {}, on
                 <div className={styles.previewTitle}>Previsualización</div>
                 <div className={styles.previewRow}>
                   <div className={styles.previewLabel}>Producto:</div>
-                  <div className={styles.previewValue}>{productId || "—"}</div>
+                  <div className={styles.previewValue}>{nombresLegibles[productId] || productId}</div>
                 </div>
 
-                <div className={styles.previewRow}>
-                  <div className={styles.previewLabel}>Ingredientes:</div>
-                  <div className={styles.previewValue}>
-                    {Object.entries(selected)
-                      .flatMap(([g, items]) => (Array.isArray(items) ? items.map((it) => `${g}: ${it}`) : []))
-                      .slice(0, 50)
-                      .join(" · ") || "—"}
+              {/* Nueva sección de ingredientes agrupados */}
+              <div className={styles.previewRow}>
+                <div className={styles.previewLabel}>Ingredientes:</div>
+                <div className={styles.previewValue}>
+                  <div className={styles.ingredientsCol}>
+                    {Object.entries(selected || {})
+                      .filter(([, items]) => Array.isArray(items) && items.length > 0)
+                      .sort(([ka], [kb]) => {
+                        const ia = ordenGlobal.indexOf(ka);
+                        const ib = ordenGlobal.indexOf(kb);
+                        if (ia === -1 && ib === -1) return ka.localeCompare(kb);
+                        if (ia === -1) return 1;
+                        if (ib === -1) return -1;
+                        return ia - ib;
+                      })
+                      .map(([grupo, items]) => {
+                        const nombreGrupo = nombresLegibles[grupo] || grupo;
+                        return (
+                          <div key={grupo} className={styles.groupLine}>
+                            <strong>{nombreGrupo}:</strong> {items.join(", ")}
+                          </div>
+                        );
+                      })}
                   </div>
                 </div>
+              </div>
 
                 <div className={styles.previewRow}>
-                  <div className={styles.previewLabel}>Precio (estimado):</div>
+                  <div className={styles.previewLabel}>Precio:</div>
                   <div className={styles.previewValue}>${previewTotal.toLocaleString()}</div>
                 </div>
               </div>
@@ -156,7 +174,7 @@ const GuardarFavorito = ({ selected = {}, productId = null, productData = {}, on
               <button
                 className={styles.confirmButton}
                 onClick={handleSave}
-                disabled={saving}
+                disabled={saving || !name.trim()}
               >
                 {saving ? "Guardando..." : "Guardar favorito"}
               </button>

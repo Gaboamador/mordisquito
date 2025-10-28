@@ -123,4 +123,13 @@
   padding: 8px 14px;
   border-radius: 6px;
   cursor: pointer;
+
+  &:disabled {
+  background-color: #ccc;        // gris suave
+  color: #666;                   // texto gris oscuro
+  cursor: not-allowed;           // cursor bloqueado
+  opacity: 0.8;                  // leve transparencia
+}
+
+
 }

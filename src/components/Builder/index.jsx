@@ -84,7 +84,7 @@ const Builder = () => {
       />
 
       <div className={styles.groups}>
-        {Object.entries(grupos).map(([key, groupItems]) => (
+        {/* {Object.entries(grupos).map(([key, groupItems]) => (
           <IngredientGroup
             key={key}
             title={nombresLegibles[key] || key}
@@ -94,7 +94,23 @@ const Builder = () => {
             onToggle={(item) => handleToggle(key, item)}
             isSalsa={key.toLowerCase() === "salsas"}
           />
-        ))}
+        ))} */}
+         {Object.entries(grupos).map(([key, groupItems]) => {
+    const isSalsaGroup = key.toLowerCase() === "salsas";
+    const saucesLocked = isSalsaGroup && (selected[key]?.length || 0) >= 2;
+
+    return (
+      <IngredientGroup
+        key={key}
+        title={nombresLegibles[key] || key}
+        description={""}
+        items={Array.isArray(groupItems) ? groupItems : []}
+        selected={selected[key] || []}
+        onToggle={(item) => handleToggle(key, item)}
+        saucesLocked={saucesLocked}
+      />
+    );
+  })}
       </div>
 
       <div className={styles.actions}>

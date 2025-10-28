@@ -1,3 +1,5 @@
+@use "../../../styles/globals.scss" as *;
+
 .overlay {
   position: fixed;
   inset: 0;
@@ -33,13 +35,16 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 10px;
+  padding-bottom: 10px;
+  border-bottom: 1px solid $color-primario;
+  // margin-bottom: 10px;
 }
 
 .title {
   font-size: 1.1rem;
   font-weight: 600;
   margin: 0;
+  color: $color-primario;
 }
 
 .closeBtn {

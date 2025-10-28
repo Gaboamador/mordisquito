@@ -33,3 +33,10 @@ export const nombresLegibles = {
   sandwiches: 'Sándwiches',
   empanadasYtartas: 'Empanadas y tartas',
 };
+
+export const productoLegible ={
+  wraps: 'wrap',
+  ensaladas: 'ensalada',
+  sandwiches: 'sándwich',
+  empanadasYtartas: 'empanadas / tarta / etc.',
+}

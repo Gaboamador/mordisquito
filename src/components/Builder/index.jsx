@@ -5,12 +5,24 @@ import SummaryBanner from "../SummaryBanner";
 import IngredientGroup from "../IngredientGroup";
 import { ordenGlobal, nombresLegibles } from "../../utils/nombresYOrden";
 import calculateTotal from "../../utils/calculateTotals";
+import Spinner from "../Spinner";
 
 const Builder = () => {
   const context = useContext(Context);
-  const { selected, setSelected, productData, products, selectedProduct, setSelectedProduct } = context;
 
-  if (!selectedProduct || !productData) return <p>Cargando productos...</p>;
+  const {
+    selected,
+    setSelected,
+    productData,
+    products,
+    selectedProduct,
+    setSelectedProduct,
+    productsLoading,
+  } = context;
+
+  if (productsLoading || !selectedProduct || !productData) {
+    return <Spinner text="Cargando productos..." />;
+  }
 
   const handleToggle = (groupKey, item) => {
     setSelected((prev) => {
@@ -57,7 +69,7 @@ const Builder = () => {
           value={selectedProduct}
           onChange={(e) => setSelectedProduct(e.target.value)}
         >
-          {products
+          {[...products]
             .sort((a, b) => {
               const idxA = ordenGlobal.indexOf(a.id);
               const idxB = ordenGlobal.indexOf(b.id);
@@ -84,20 +96,9 @@ const Builder = () => {
       />
 
       <div className={styles.groups}>
-        {/* {Object.entries(grupos).map(([key, groupItems]) => (
-          <IngredientGroup
-            key={key}
-            title={nombresLegibles[key] || key}
-            description={""}
-            items={Array.isArray(groupItems) ? groupItems : []}
-            selected={selected[key] || []}
-            onToggle={(item) => handleToggle(key, item)}
-            isSalsa={key.toLowerCase() === "salsas"}
-          />
-        ))} */}
-         {Object.entries(grupos).map(([key, groupItems]) => {
-    const isSalsaGroup = key.toLowerCase() === "salsas";
-    const saucesLocked = isSalsaGroup && (selected[key]?.length || 0) >= 2;
+      {Object.entries(grupos).map(([key, groupItems]) => {
+      const isSalsaGroup = key.toLowerCase() === "salsas";
+      const saucesLocked = isSalsaGroup && (selected[key]?.length || 0) >= 2;
 
     return (
       <IngredientGroup

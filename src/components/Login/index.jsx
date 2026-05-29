@@ -9,7 +9,7 @@ import { FaSignInAlt, FaUserPlus } from "react-icons/fa";
 import { auth } from "../../utils/firebase";
 import zxcvbn from 'zxcvbn';
 import styles from "./estilos/login.module.scss"
-import globalStyles from "../../styles/Botones.scss"
+import globalStyles from "../../styles/Botones.module.scss"
 
 const Login = ({ isLogin, setIsLogin, setShowRecovery }) => {
 

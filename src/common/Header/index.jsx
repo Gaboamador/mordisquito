@@ -1,60 +1,73 @@
-import React, { useState, useContext } from 'react';
-import Context from '../../context';
-import styles from './estilos/header.module.scss';
-import AdministrarFavoritos from '../../components/Favoritos/AdministrarFavoritos';
-// import isologo from '../isologo.svg'
-import { IoMdSettings } from "react-icons/io";
-import { FiMenu, FiLogOut, FiX } from "react-icons/fi";
-import { FaUserEdit } from "react-icons/fa";
-
+import React, { useState, useContext, useEffect, useRef } from "react";
+import Context from "../../context";
+import styles from "./estilos/header.module.scss";
+import AdministrarFavoritos from "../../components/Favoritos/AdministrarFavoritos";
+import { FiLogOut } from "react-icons/fi";
 
 const Header = () => {
+  const context = useContext(Context);
 
-  const context = useContext(Context)
   const [menuOpen, setMenuOpen] = useState(false);
   const [favModalOpen, setFavModalOpen] = useState(false);
 
- return (
-  <header className={styles.appHeader}>
-    <div className={styles.headerContent}>
-      <div className={styles.isologoContainer}>
-        {/* <img src={isologo} alt={""} className={styles.isologo} /> */}
-        <span>TITLE</span>
-      </div>
+  const menuRef = useRef(null);
 
-      {context.user && (
-        <div className={styles.menuButtonContainer}>
-          <button
-            onClick={() => setMenuOpen((prev) => !prev)}
-            className={styles.menuButton}
-          >
-            <div
-              className={`${styles.hamburger} ${
-                menuOpen ? styles.isActive : ""
-              }`}
+  useEffect(() => {
+    if (!menuOpen) return;
+
+    const handleClickOutside = (event) => {
+      if (!menuRef.current) return;
+
+      if (!menuRef.current.contains(event.target)) {
+        setMenuOpen(false);
+      }
+    };
+
+    document.addEventListener("mousedown", handleClickOutside);
+
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, [menuOpen]);
+
+  return (
+    <header className={styles.appHeader}>
+      <div className={styles.headerContent}>
+        <div className={styles.isologoContainer}>
+          <span>MORDISQUITO</span>
+        </div>
+
+        {context.user && (
+          <div className={styles.menuButtonContainer} ref={menuRef}>
+            <button
+              type="button"
+              onClick={() => setMenuOpen((prev) => !prev)}
+              className={styles.menuButton}
+              aria-label={menuOpen ? "Cerrar menú" : "Abrir menú"}
+              aria-expanded={menuOpen}
             >
-              <span className={styles.hamburgerLine}></span>
-              <span className={styles.hamburgerLine}></span>
-              <span className={styles.hamburgerLine}></span>
-            </div>
-          </button>
-
-          {/* {menuOpen && (
-            <ul className={styles.menuDropdown}>
-              <li
-                onClick={() => {
-                  context.logout();
-                  setMenuOpen(false);
-                }}
+              <div
+                className={`${styles.hamburger} ${
+                  menuOpen ? styles.isActive : ""
+                }`}
               >
-                <FiLogOut className={styles.settingsIcon} />
-                Cerrar sesión
-              </li>
-            </ul>
-          )} */}
-                      {menuOpen && (
+                <span className={styles.hamburgerLine}></span>
+                <span className={styles.hamburgerLine}></span>
+                <span className={styles.hamburgerLine}></span>
+              </div>
+            </button>
+
+            {menuOpen && (
               <ul className={styles.menuDropdown}>
-                <li onClick={() => setFavModalOpen(true)}>Mis Favoritos</li>
+                <li
+                  onClick={() => {
+                    setFavModalOpen(true);
+                    setMenuOpen(false);
+                  }}
+                >
+                  Mis Favoritos
+                </li>
+
                 <li
                   onClick={() => {
                     context.logout();
@@ -66,17 +79,16 @@ const Header = () => {
                 </li>
               </ul>
             )}
+          </div>
+        )}
 
-        </div>
-      )}
-       <AdministrarFavoritos
+        <AdministrarFavoritos
           open={favModalOpen}
           onClose={() => setFavModalOpen(false)}
         />
-    </div>
-  </header>
-);
-
+      </div>
+    </header>
+  );
 };
 
 export default Header;

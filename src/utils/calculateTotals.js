@@ -1,7 +1,3 @@
-// Función pura para calcular total a partir de productData y selected
-// productData: objeto que contiene 'precios' (estructura usada en Firestore)
-// selected: { grupo1: [...], grupo2: [...], ... }
-
 export function calculateTotal(productData, selected) {
   const precios = productData?.precios || {};
   const sel = selected || {};

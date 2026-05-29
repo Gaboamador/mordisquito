@@ -1,4 +1,10 @@
-import { collection, getDocs, doc, getDoc, setDoc } from "firebase/firestore";
+import {
+  collection,
+  getDocs,
+  doc,
+  getDoc,
+  updateDoc,
+} from "firebase/firestore";
 import { db } from "./firebase";
 
 /**
@@ -34,5 +40,55 @@ export const getProductData = async (type) => {
   } catch (error) {
     console.error("Error al obtener datos de Firestore:", error);
     return null;
+  }
+};
+
+/**
+ * Obtiene solamente los precios de todos los productos.
+ * Devuelve:
+ * [
+ *   {
+ *     id: "empanadas",
+ *     nombre: "Empanadas",
+ *     precios: { unidad: 1200, docena: 12000 }
+ *   }
+ * ]
+ */
+export const getAllProductPrices = async () => {
+  try {
+    const colRef = collection(db, "productos");
+    const snapshot = await getDocs(colRef);
+
+    return snapshot.docs.map((d) => {
+      const data = d.data();
+
+      return {
+        id: d.id,
+        nombre: data.nombre ?? data.name ?? d.id,
+        precios: data.precios ?? {},
+      };
+    });
+  } catch (error) {
+    console.error("Error al obtener precios de productos:", error);
+    return [];
+  }
+};
+
+/**
+ * Actualiza el objeto 'precios' de un producto.
+ * No pisa el resto del documento.
+ */
+export const updateProductPrices = async (productId, precios) => {
+  try {
+    const docRef = doc(db, "productos", productId);
+
+    await updateDoc(docRef, {
+      precios,
+    });
+
+    return true;
+  } catch (error) {
+    console.error(`Error al actualizar precios de "${productId}":`, error);
+    return false;
   }
 };

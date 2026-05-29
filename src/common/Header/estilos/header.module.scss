@@ -24,7 +24,8 @@
     justify-content: space-between;
     width: 100%;
     margin: 0 auto;
-    max-width: 480px;
+    padding: 0 16px;
+    // max-width: 480px;
 }
 
 .appLogoContainer {
@@ -74,7 +75,7 @@ padding: 5px;
 }
 
 .settingsIcon {
-    color: white;
+  color: $color-primario;
   font-size: 1.5rem;
 }
 
@@ -153,36 +154,22 @@ padding: 5px;
 .menuDropdown {
   position: absolute;
   text-align: left;
-  top: 20px;
-  right: 5px;
-  border: 1px inset $color-borde;
+  top: 25px;
+  right: 25px;
+  width: 250px;
   background-color: $color-fondo-oscuro;
   border-radius: 15px;
   list-style: none;
-  padding: .5rem;
+  padding: 1rem;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
   z-index: 1000;
   
-li:first-child {
-  &:hover {background-color: transparent;}
-  cursor: auto;
-}
-
-li:nth-child(2) {
-  &:hover {background-color: transparent;}
-  cursor: auto;
-
-  border-bottom: 1px solid $color-primario;
-  border-radius: 0;
-  margin-bottom: 5px;
-}
-
   li {
     color: $color-primario;
     padding: 0.5rem;
     cursor: pointer;
     &:hover {
-      background-color: $color-fondo;
+      background-color: rgba($color-primario, 0.11);
     }
     display: flex;
     gap: 5px;

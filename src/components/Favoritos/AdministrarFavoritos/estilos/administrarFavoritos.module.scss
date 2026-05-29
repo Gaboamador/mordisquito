@@ -30,33 +30,48 @@
   padding: 0.9rem 1rem;
   background: #fafafa;
   border-radius: 10px;
-  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.08);
 }
 
 /* Primera línea */
 .topRow {
   display: grid;
-  grid-template-columns: 2fr 1fr auto;
+  grid-template-columns: minmax(0, 1fr) auto auto;
   align-items: center;
-  gap: 1rem;
-  border-bottom: 1px dotted $color-acento;
+  gap: 0.5rem;
+  border-bottom: 1px solid $color-primario;
+  border-bottom-left-radius: $radius-base;
 }
 
 /* Nombre y productId */
 .nameCol {
+  min-width: 0;
   display: flex;
   flex-direction: column;
+  background: rgba($color-primario, 0.75);
+  padding: 4px;
+  border-radius: $radius-base;
+
 }
 
 .name {
+  min-width: 0;
   font-weight: 600;
   font-size: 0.95rem;
-  color: $color-primario;
+  color: $color-fondo;
+
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .productId {
+  min-width: 0;
   font-size: 0.8rem;
-  color: #888;
+  color: $color-texto;
+
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 /* Ingredientes: segunda línea que ocupa todo el ancho */
@@ -69,9 +84,16 @@
   gap: 0.2rem;
 }
 
+.groupLine {
+  display: flex;
+  flex-direction: column;
+  border-bottom: 1px solid $color-borde;
+}
+
 .groupLine strong {
-  font-weight: 500;
-  color: #555;
+  font-weight: 600;
+  color: $color-acento;
+  text-transform: uppercase;
 }
 
 /* Precio y acciones (primera línea) */
@@ -96,99 +118,15 @@
   font-size: 1.1rem;
   color: #555;
   transition: color 0.2s ease;
+  line-height: 1;
+  display: flex;
+  align-items: center;
+
+  &.apply {
+    color: $color-success;
+  }
 
   &:hover {
     color: #e63946;
   }
 }
-
-// @use "../../../../styles/globals.scss" as *;
-
-// .loader {
-//   text-align: center;
-//   padding: 20px;
-// }
-
-// .error {
-//   color: #b00020;
-//   padding: 10px;
-// }
-
-// .empty {
-//   text-align: center;
-//   padding: 20px;
-//   color: #777;
-// }
-
-// .list {
-//   display: flex;
-//   flex-direction: column;
-//   gap: 0.8rem;
-// }
-
-// .item {
-//   display: grid;
-//   grid-template-columns: 1.2fr 2.5fr 0.8fr auto;
-//   align-items: center;
-//   gap: 1rem;
-//   padding: 0.75rem 1rem;
-//   background: #fafafa;
-//   border-radius: 10px;
-//   box-shadow: 0 1px 2px rgba(0,0,0,0.08);
-// }
-
-// .nameCol {
-//   display: flex;
-//   flex-direction: column;
-// }
-
-// .name {
-//   font-weight: 600;
-//   font-size: 0.95rem;
-//   color: $color-primario;
-// }
-
-// .productId {
-//   font-size: 0.8rem;
-//   color: #888;
-// }
-
-// .ingredientsCol {
-//   font-size: 0.85rem;
-//   color: #333;
-//   display: flex;
-//   flex-direction: column;
-//   gap: 0.2rem;
-// }
-
-// .groupLine strong {
-//   font-weight: 500;
-//   color: #555;
-// }
-
-// .priceCol {
-//   font-weight: 600;
-//   text-align: right;
-//   font-size: 0.9rem;
-//   color: $color-primario;
-// }
-
-// .actionsCol {
-//   display: flex;
-//   gap: 0.5rem;
-//   justify-content: flex-end;
-// }
-
-// .iconBtn {
-//   background: none;
-//   border: none;
-//   cursor: pointer;
-//   padding: 0.4rem;
-//   font-size: 1.1rem;
-//   color: #555;
-//   transition: color 0.2s ease;
-
-//   &:hover {
-//     color: #e63946;
-//   }
-// }

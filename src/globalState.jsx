@@ -1,217 +1,338 @@
-import Context from './context'
-import { useState, useEffect } from 'react'
-import { onAuthStateChanged, signOut } from 'firebase/auth';
-import { auth } from './utils/firebase';
-import { obtenerFavoritos } from './utils/firebaseFavoritos';
-import { getAllProducts, getProductData } from './utils/firebaseCatalog';
+import Context from "./context";
+import { useState, useEffect } from "react";
+import { onAuthStateChanged, signOut } from "firebase/auth";
+import { auth } from "./utils/firebase";
+import { obtenerFavoritos } from "./utils/firebaseFavoritos";
+import { getAllProducts, getProductData } from "./utils/firebaseCatalog";
 
-function GlobalState(props){
+function buildEmptySelection(data) {
+  const grupos = data?.ingredientes || data?.grupos || {};
 
+  return Object.keys(grupos).reduce((acc, key) => {
+    acc[key] = [];
+    return acc;
+  }, {});
+}
+
+function safelyParseSessionSelection() {
+  try {
+    const saved = sessionStorage.getItem("builderSelected");
+    return saved ? JSON.parse(saved) : {};
+  } catch {
+    sessionStorage.removeItem("builderSelected");
+    return {};
+  }
+}
+
+function GlobalState(props) {
   const [loading, setLoading] = useState(true);
+  const [productsLoading, setProductsLoading] = useState(true);
+  const [favoritesLoading, setFavoritesLoading] = useState(false);
 
   const [user, setUser] = useState(null);
 
-  // Datos del tipo de producto (ej.: wraps) seleccionado (ingredientes y precios)
   const [productData, setProductData] = useState(null);
-
-  // Map de datos de productos { productId: productData }
   const [productsDataMap, setProductsDataMap] = useState({});
-  
-  // Objeto con la selección de ingredientes actual
+
   const [selected, setSelected] = useState(() => {
-    const saved = sessionStorage.getItem('builderSelected');
-    return saved ? JSON.parse(saved) : {};
+    return safelyParseSessionSelection();
   });
 
-  // Guarda la lista de completa de datos obtenidos de Firebase (documentos en la colección "productos")
   const [products, setProducts] = useState([]);
 
-  // Producto seleccionado actualmente (ej.: "wraps")
   const [selectedProduct, setSelectedProduct] = useState(() => {
-    return sessionStorage.getItem('builderSelectedProduct') || null;
+    return sessionStorage.getItem("builderSelectedProduct") || null;
   });
 
-  // Estado para controlar si los ingredientes actuales corresponden a un favorito elegido
   const [favoritoElegido, setFavoritoElegido] = useState(false);
-
-  // Estado para almacenar el favorito actual completo
   const [favoritoActual, setFavoritoActual] = useState(null);
-
-  // Lista global de favoritos
   const [favoritos, setFavoritos] = useState([]);
 
-  // Escuchar autenticación
+  // 1) Auth: desbloquea la app apenas Firebase confirma sesión.
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, async (user) => {
-      if (user) {
-        setUser(user);
-
-        // Cargar favoritos al iniciar sesión
-        try {
-          const favs = await obtenerFavoritos(user.uid);
-          setFavoritos(favs || []);
-        } catch (err) {
-          console.error("Error cargando favoritos globales:", err);
-        }
-      // 🔹 Cargar lista de productos y datos del producto seleccionado
-        try {
-          const list = await getAllProducts();
-          setProducts(list || []);
-
-          // Map para almacenar datos de cada producto
-          const dataMap = {};
-          for (const p of list) {
-            const data = await getProductData(p.id);
-            dataMap[p.id] = data || {};
-          }
-          setProductsDataMap(dataMap);
-
-          // Determinar selectedProduct inicial
-          let prodId = sessionStorage.getItem('builderSelectedProduct');
-          if (!prodId && list.length > 0) prodId = list[0].id;
-          setSelectedProduct(prodId);
-
-          // Inicializar productData y selected
-          if (prodId) {
-            const data = dataMap[prodId] || {};
-            setProductData(data);
-
-            const saved = sessionStorage.getItem('builderSelected');
-            const savedProduct = sessionStorage.getItem('builderSelectedProduct');
-
-            if (saved && savedProduct === prodId) {
-              setSelected(JSON.parse(saved));
-            } else {
-              const grupos = data.ingredientes || data.grupos || {};
-              const emptySelection = Object.keys(grupos).reduce((acc, key) => {
-                acc[key] = [];
-                return acc;
-              }, {});
-              setSelected(emptySelection);
-            }
-          }
-
-        } catch (err) {
-          console.error("Error cargando productos o datos:", err);
-        }
-
-      } else {
-        setUser(null);
-        setFavoritos([]);
-        setProducts([]);
-        setProductsDataMap({});
-        setSelectedProduct(null);
-        setProductData(null);
-        setSelected({});
-      }
-
+    const unsubscribe = onAuthStateChanged(auth, (firebaseUser) => {
+      setUser(firebaseUser || null);
       setLoading(false);
     });
 
     return () => unsubscribe();
   }, []);
 
-// 🔹 Actualizar productData y selected cuando cambia selectedProduct
+  // 2) Productos: carga lista y solo el producto inicial.
   useEffect(() => {
-    if (!selectedProduct) return;
-    const data = productsDataMap[selectedProduct] || {};
-    setProductData(data);
-
-    const saved = sessionStorage.getItem('builderSelected');
-    const savedProduct = sessionStorage.getItem('builderSelectedProduct');
-
-    if (saved && savedProduct === selectedProduct) {
-      setSelected(JSON.parse(saved));
-    } else {
-      const grupos = data.ingredientes || data.grupos || {};
-      const emptySelection = Object.keys(grupos).reduce((acc, key) => {
-        acc[key] = [];
-        return acc;
-      }, {});
-      setSelected(emptySelection);
+    if (!user) {
+      setProducts([]);
+      setProductsDataMap({});
+      setSelectedProduct(null);
+      setProductData(null);
+      setSelected({});
+      setProductsLoading(false);
+      return;
     }
-  }, [selectedProduct, productsDataMap]);
 
-  // 🔹 Guardar selección y producto en sessionStorage
-  useEffect(() => {
-    if (!selectedProduct) return;
-    sessionStorage.setItem('builderSelected', JSON.stringify(selected));
-    sessionStorage.setItem('builderSelectedProduct', selectedProduct);
-  }, [selected, selectedProduct]);
+    let cancelled = false;
 
-  // Verificar si la selección coincide con algún favorito
-    const verificarFavoritoActual = () => {
-      if (!user || !selectedProduct) {
-        setFavoritoElegido(false);
-        setFavoritoActual(null);
-        return;
-      }
+    const loadInitialProducts = async () => {
+      setProductsLoading(true);
 
-      const match = favoritos.find((fav) => {
-        if (fav.productId !== selectedProduct) return false;
+      try {
+        const list = await getAllProducts();
 
-        const favIngredientes = fav.ingredientes || {};
-        const selIngredientes = selected || {};
+        if (cancelled) return;
 
-        return Object.keys(favIngredientes).every((key) => {
-          const favItems = favIngredientes[key] || [];
-          const selItems = selIngredientes[key] || [];
-          if (favItems.length !== selItems.length) return false;
-          return favItems.every((item) => selItems.includes(item));
-        });
-      });
+        const safeList = list || [];
+        setProducts(safeList);
 
-      if (match) {
-        setFavoritoElegido(true);
-        setFavoritoActual(match); // guarda el objeto completo del favorito
-      } else {
-        setFavoritoElegido(false);
-        setFavoritoActual(null);
+        let prodId = sessionStorage.getItem("builderSelectedProduct");
+
+        if (!prodId && safeList.length > 0) {
+          prodId = safeList[0].id;
+        }
+
+        if (!prodId) {
+          setSelectedProduct(null);
+          setProductData(null);
+          setSelected({});
+          return;
+        }
+
+        setSelectedProduct(prodId);
+
+        const data = await getProductData(prodId);
+
+        if (cancelled) return;
+
+        const safeData = data || {};
+
+        setProductsDataMap((prev) => ({
+          ...prev,
+          [prodId]: safeData,
+        }));
+
+        setProductData(safeData);
+
+        const saved = sessionStorage.getItem("builderSelected");
+        const savedProduct = sessionStorage.getItem("builderSelectedProduct");
+
+        if (saved && savedProduct === prodId) {
+          setSelected(safelyParseSessionSelection());
+        } else {
+          setSelected(buildEmptySelection(safeData));
+        }
+      } catch (err) {
+        if (!cancelled) {
+          console.error("Error cargando productos o datos:", err);
+        }
+      } finally {
+        if (!cancelled) {
+          setProductsLoading(false);
+        }
       }
     };
 
+    loadInitialProducts();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [user]);
+
+  // 3) Favoritos: carga en segundo plano, no bloquea la app.
   useEffect(() => {
-    verificarFavoritoActual();
+    if (!user) {
+      setFavoritos([]);
+      setFavoritesLoading(false);
+      return;
+    }
+
+    let cancelled = false;
+
+    const loadFavoritos = async () => {
+      setFavoritesLoading(true);
+
+      try {
+        const favs = await obtenerFavoritos(user.uid);
+
+        if (!cancelled) {
+          setFavoritos(favs || []);
+        }
+      } catch (err) {
+        if (!cancelled) {
+          console.error("Error cargando favoritos globales:", err);
+          setFavoritos([]);
+        }
+      } finally {
+        if (!cancelled) {
+          setFavoritesLoading(false);
+        }
+      }
+    };
+
+    loadFavoritos();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [user]);
+
+  // 4) Cuando cambia selectedProduct, cargar ese producto si no está cacheado.
+  useEffect(() => {
+    if (!user || !selectedProduct) return;
+
+    let cancelled = false;
+
+    const loadSelectedProductData = async () => {
+      setProductsLoading(true);
+
+      try {
+        let data = productsDataMap[selectedProduct];
+
+        if (!data) {
+          data = await getProductData(selectedProduct);
+
+          if (cancelled) return;
+
+          data = data || {};
+
+          setProductsDataMap((prev) => ({
+            ...prev,
+            [selectedProduct]: data,
+          }));
+        }
+
+        if (cancelled) return;
+
+        setProductData(data);
+
+        const saved = sessionStorage.getItem("builderSelected");
+        const savedProduct = sessionStorage.getItem("builderSelectedProduct");
+
+        if (saved && savedProduct === selectedProduct) {
+          setSelected(safelyParseSessionSelection());
+        } else {
+          setSelected(buildEmptySelection(data));
+        }
+      } catch (err) {
+        if (!cancelled) {
+          console.error("Error cargando datos del producto seleccionado:", err);
+          setProductData(null);
+          setSelected({});
+        }
+      } finally {
+        if (!cancelled) {
+          setProductsLoading(false);
+        }
+      }
+    };
+
+    loadSelectedProductData();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [user, selectedProduct]);
+
+  // 5) Guardar selección y producto en sessionStorage.
+  useEffect(() => {
+    if (!selectedProduct) return;
+
+    sessionStorage.setItem("builderSelected", JSON.stringify(selected));
+    sessionStorage.setItem("builderSelectedProduct", selectedProduct);
+  }, [selected, selectedProduct]);
+
+  // 6) Verificar si la selección coincide con algún favorito.
+  useEffect(() => {
+    if (!user || !selectedProduct) {
+      setFavoritoElegido(false);
+      setFavoritoActual(null);
+      return;
+    }
+
+    const match = favoritos.find((fav) => {
+      if (fav.productId !== selectedProduct) return false;
+
+      const favIngredientes = fav.ingredientes || {};
+      const selIngredientes = selected || {};
+
+      return Object.keys(favIngredientes).every((key) => {
+        const favItems = favIngredientes[key] || [];
+        const selItems = selIngredientes[key] || [];
+
+        if (favItems.length !== selItems.length) return false;
+
+        return favItems.every((item) => selItems.includes(item));
+      });
+    });
+
+    if (match) {
+      setFavoritoElegido(true);
+      setFavoritoActual(match);
+    } else {
+      setFavoritoElegido(false);
+      setFavoritoActual(null);
+    }
   }, [selected, selectedProduct, favoritos, user]);
 
-  // Función para cerrar sesión
   const logout = async () => {
     try {
       await signOut(auth);
-      // Opcional: limpiar estado local si querés
+
       setUser(null);
-      sessionStorage.removeItem('builderSelected');
-      sessionStorage.removeItem('builderSelectedProduct');
+      setFavoritos([]);
+      setProducts([]);
+      setProductsDataMap({});
+      setSelectedProduct(null);
+      setProductData(null);
+      setSelected({});
+      setFavoritoElegido(false);
+      setFavoritoActual(null);
+
+      sessionStorage.removeItem("builderSelected");
+      sessionStorage.removeItem("builderSelectedProduct");
     } catch (error) {
       console.error("Error cerrando sesión:", error);
     }
   };
-console.log(favoritoElegido, "fav global")
 
-    return(
-        <Context.Provider value={{
-            user,
-            setUser,
-            logout,
-            loading,
-            selected,
-            setSelected,
-            productData,
-            setProductData,
-            products,
-            setProducts,
-            selectedProduct,
-            setSelectedProduct,
-            favoritoElegido,
-            setFavoritoElegido,
-            favoritoActual,
-            favoritos,
-            setFavoritos,
-            productsDataMap,
-        }}>
-            {props.children}
-        </Context.Provider>
-    )
+  return (
+    <Context.Provider
+      value={{
+        user,
+        setUser,
+        logout,
+
+        loading,
+        productsLoading,
+        favoritesLoading,
+
+        selected,
+        setSelected,
+
+        productData,
+        setProductData,
+
+        products,
+        setProducts,
+
+        selectedProduct,
+        setSelectedProduct,
+
+        favoritoElegido,
+        setFavoritoElegido,
+
+        favoritoActual,
+        setFavoritoActual,
+
+        favoritos,
+        setFavoritos,
+
+        productsDataMap,
+        setProductsDataMap,
+      }}
+    >
+      {props.children}
+    </Context.Provider>
+  );
 }
 
 export default GlobalState;

@@ -5,7 +5,7 @@ import Context from "../../../context";
 import { eliminarFavorito } from "../../../utils/firebaseFavoritos";
 import calculateTotal from "../../../utils/calculateTotals";
 import { ordenGlobal, nombresLegibles } from "../../../utils/nombresYOrden";
-import { MdDownload, MdDelete } from "react-icons/md";
+import { MdCheckCircleOutline, MdDelete } from "react-icons/md";
 
 const AdministrarFavoritos = ({ open, onClose }) => {
   const context = useContext(Context);
@@ -64,7 +64,7 @@ return (
         const productDataForFav = productsDataMap?.[fav.productId];
         const precio = productDataForFav
           ? calculateTotal(productDataForFav, fav.ingredientes)
-          : 0;
+          : null;
 
         return (
           <div key={fav.id} className={styles.item}>
@@ -78,16 +78,16 @@ return (
               </div>
 
               <div className={styles.priceCol}>
-                ${precio.toLocaleString()}
+                {precio === null ? "Calculando..." : `$${precio.toLocaleString()}`}
               </div>
 
               <div className={styles.actionsCol}>
                 <button
-                  title="Cargar favorito"
-                  className={styles.iconBtn}
+                  title="Aplicar favorito"
+                  className={`${styles.iconBtn} ${styles.apply}`}
                   onClick={() => handleLoadFavorito(fav)}
                 >
-                  <MdDownload />
+                  <MdCheckCircleOutline />
                 </button>
                 <button
                   title="Eliminar favorito"
@@ -115,7 +115,7 @@ return (
                   const nombreGrupo = nombresLegibles[grupo] || grupo;
                   return (
                     <div key={grupo} className={styles.groupLine}>
-                      <strong>{nombreGrupo}:</strong> {items.join(", ")}
+                      <strong>{nombreGrupo}</strong> {items.join(", ")}
                     </div>
                   );
                 })}

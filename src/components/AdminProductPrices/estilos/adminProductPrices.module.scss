@@ -1,3 +1,11 @@
+@use "../../../styles/globals.scss" as *;
+
+.container {
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 1rem;
+}
+
 .wrapper {
   display: grid;
   gap: 1rem;
@@ -58,11 +66,30 @@
 }
 
 .productHeader {
+  display: block;
+}
+
+.productToggle {
+  width: 100%;
+
   display: flex;
-  align-items: flex-start;
+  align-items: center;
   justify-content: space-between;
   gap: 1rem;
+
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
 }
+
+.productTitleWrapper {
+  min-width: 0;
+}
+
 
 .productTitle {
   margin: 0;
@@ -77,6 +104,15 @@
   opacity: 0.6;
 }
 
+.chevron {
+  flex: 0 0 auto;
+  transition: transform 0.2s ease;
+}
+
+.chevronOpen {
+  transform: rotate(180deg);
+}
+
 .fieldsWrapper {
   display: grid;
   gap: 0.85rem;
@@ -86,9 +122,21 @@
 .fieldsGroup {
   display: grid;
   gap: 0.85rem;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.fieldsRoot > *,
+.fieldsGroup > * {
+  min-width: 0;
+}
+
+/* Si un grupo interno tiene un solo campo, ocupa todo el ancho */
+.fieldsGroup > .field:only-child {
+  grid-column: 1 / -1;
 }
 
 .fieldset {
+  min-width: 0;
   display: grid;
   gap: 0.85rem;
   margin: 0;
@@ -102,11 +150,12 @@
   padding: 0 0.35rem;
   font-size: 0.82rem;
   font-weight: 700;
-  text-transform: capitalize;
+  text-transform: uppercase;
   opacity: 0.8;
 }
 
 .field {
+  min-width: 0;
   display: grid;
   gap: 0.4rem;
 }
@@ -114,12 +163,15 @@
 .fieldLabel {
   font-size: 0.82rem;
   font-weight: 600;
-  text-transform: capitalize;
   opacity: 0.8;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .input {
   width: 100%;
+  min-width: 0;
   min-height: 2.45rem;
   padding: 0.55rem 0.7rem;
   border: 1px solid rgba(148, 163, 184, 0.45);
@@ -128,6 +180,7 @@
   color: inherit;
   font: inherit;
   outline: none;
+  text-align: center;
 
   &:focus {
     border-color: rgba(37, 99, 235, 0.7);
@@ -164,7 +217,22 @@
 }
 
 @media (min-width: 640px) {
+  .container {
+    padding: 12px;
+  }
+
   .productsList {
     grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 360px) {
+  .fieldsRoot,
+  .fieldsGroup {
+    grid-template-columns: 1fr;
+  }
+
+  .fieldsGroup > .field:only-child {
+    grid-column: auto;
   }
 }

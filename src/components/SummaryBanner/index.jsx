@@ -18,34 +18,30 @@ const SummaryBanner = ({
   const [open, setOpen] = useState(true);
 
   return (
-    <div className={styles.banner}>
-      <div className={styles.content}>
+  <div className={styles.banner}>
+    <div className={styles.content}>
+      <div className={styles.titleRow}>
         <button
           type="button"
-          className={styles.titleRow}
+          className={styles.titleToggle}
           onClick={() => setOpen((prev) => !prev)}
           aria-expanded={open}
         >
           <div className={styles.title}>Resumen del producto</div>
 
-          <div className={styles.titleActions}>
-            <div
-              onClick={(e) => {
-                e.stopPropagation();
-              }}
-            >
-              <GuardarFavorito
-                selected={selected}
-                productId={selectedProduct}
-                productData={productData}
-              />
-            </div>
-
-            <FiChevronDown
-              className={`${styles.chevron} ${open ? styles.chevronOpen : ""}`}
-            />
-          </div>
+          <FiChevronDown
+            className={`${styles.chevron} ${open ? styles.chevronOpen : ""}`}
+          />
         </button>
+
+        <div className={styles.titleActions}>
+          <GuardarFavorito
+            selected={selected}
+            productId={selectedProduct}
+            productData={productData}
+          />
+        </div>
+      </div>
 
         {open && (
           <>

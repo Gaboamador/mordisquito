@@ -1,9 +1,9 @@
 // Orden global deseado (afecta solo a las keys que existan)
 export const ordenGlobal = [
-    'wraps',
-    'ensaladas',
-    'sandwiches',
-    'empanadasYtartas',
+  'wraps',
+  'ensaladas',
+  'sandwiches',
+  'empanadasYtartas',
   'base',
   'pan',
   'grupo1',
@@ -14,6 +14,9 @@ export const ordenGlobal = [
   'canastitas',
   'tartas',
   'calzones',
+  "maxGratis",
+  "precioExtra",
+  "unidadPrecio",
 ];
 
 // Mapping global de nombres legibles
@@ -40,3 +43,10 @@ export const productoLegible ={
   sandwiches: 'sándwich',
   empanadasYtartas: 'empanadas / tarta / etc.',
 }
+
+// Labels legibles para campos internos de precios
+export const labelsLegibles = {
+  unidadPrecio: "Precio por unidad",
+  maxGratis: "Cantidad incluida",
+  precioExtra: "Precio extra",
+};

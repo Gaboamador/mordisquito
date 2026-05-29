@@ -31,15 +31,32 @@
   color: inherit;
 }
 
-.titleActions {
+.titleToggle {
+  flex: 1;
+  min-width: 0;
+
   display: flex;
   align-items: center;
-  gap: 0.5rem;
-  flex-shrink: 0;
+  justify-content: space-between;
+  gap: 0.75rem;
+
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
+.titleActions {
+  flex: 0 0 auto;
+  display: flex;
+  align-items: center;
 }
 
 .chevron {
-  font-size: 1.2rem;
+  flex: 0 0 auto;
   transition: transform 0.2s ease;
 }
 

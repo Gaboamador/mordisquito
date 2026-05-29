@@ -9,6 +9,7 @@ import React, {
 import Context from "./context";
 import GlobalState from "./globalState";
 import { sendEmailVerification } from "firebase/auth";
+import { useAdmin } from "./hooks/useAdmin";
 import Header from "./common/Header";
 import Auth from "./components/Auth";
 
@@ -20,6 +21,7 @@ const AdminProductPrices = lazy(() => import("./components/AdminProductPrices"))
 
 function AppContent() {
   const context = useContext(Context);
+  const { isAdmin } = useAdmin(context.user);
 
   const [verificationSent, setVerificationSent] = useState(false);
   const [editPricesOpen, setEditPricesOpen] = useState(false);
@@ -39,6 +41,12 @@ function AppContent() {
 
     enviarVerificacion();
   }, [context.user, verificationSent]);
+
+  useEffect(() => {
+    if (!isAdmin) {
+      setEditPricesOpen(false);
+    }
+  }, [isAdmin]);
 
   const handleResendVerification = async () => {
     if (!context.user || context.user.emailVerified) return;
@@ -139,21 +147,23 @@ function AppContent() {
           <Builder />
         </Suspense>
 
-        <section>
-          <button
-            type="button"
-            className={styles.editPricesButton}
-            onClick={() => setEditPricesOpen((prev) => !prev)}
-          >
-            {editPricesOpen ? "Ocultar editor de precios" : "Editar precios"}
-          </button>
+        {isAdmin && (
+          <section>
+            <button
+              type="button"
+              className={styles.editPricesButton}
+              onClick={() => setEditPricesOpen((prev) => !prev)}
+            >
+              {editPricesOpen ? "Ocultar editor de precios" : "Editar precios"}
+            </button>
 
-          {editPricesOpen && (
-            <Suspense fallback={null}>
-              <AdminProductPrices />
-            </Suspense>
-          )}
-        </section>
+            {editPricesOpen && (
+              <Suspense fallback={null}>
+                <AdminProductPrices />
+              </Suspense>
+            )}
+          </section>
+        )}
       </div>
     </div>
   );
